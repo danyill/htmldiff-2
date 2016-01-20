@@ -1,22 +1,10 @@
-htmldiff is a PHP library that displays the difference between two HTML snippets. It is taken from the [MediaWiki Visual Diff module](http://www.mediawiki.org/wiki/Visual_Diff) and has been modified to be usable outside of MediaWiki.
+PhpHtmlDiff is a PHP library that displays the difference between two HTML snippets. It is taken from the [MediaWiki Visual Diff module](http://www.mediawiki.org/wiki/Visual_Diff) and has been modified to be usable outside of MediaWiki.
 
 Usage
 =====
 
-```php
-require("htmldiff/html_diff.php");
-
-$html1 = "<p>This is an example text with a <strong>bold part</strong>.</p>";
-$html2 = "<p>This is a changed example text without a bold part.</p>";
-
-echo html_diff($html1, $html2);
-```
-
-Output:
-
-```html
-<p>This is <span class="diff-html-removed" id="removed-htmldiff-0">an </span><span class="diff-html-added" id="added-htmldiff-0">a changed </span>example text <span class="diff-html-removed" id="removed-htmldiff-1">with </span><span class="diff-html-added" id="added-htmldiff-1">without </span>a bold part.</p>
-```
+1. Clone this repository somewhere.
+2. Run bin/php-html-diff.php diff file1.html file2.html
 
 License
 =======
@@ -41,3 +29,7 @@ Sources
 
 These are the original MediaWiki source files that this library is based on: [HTMLDiff.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/diff/HTMLDiff.php?view=markup&pathrev=58266), [Diff.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/diff/Diff.php?view=markup&pathrev=58266), [Nodes.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/diff/Nodes.php?view=markup&pathrev=58266), 
 [Sanitizer.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/Sanitizer.php?view=markup&pathrev=58267), [Xml.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/Xml.php?view=markup&pathrev=58267)
+
+[![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg?style=flat-square)](https://php.net/)
+[![Total Downloads](https://poser.pugx.org/brownbear/php-transpiler/downloads)](https://packagist.org/packages/brownbear/php-transpiler)
+[![Dependency Status](https://www.versioneye.com/user/projects/567fc289eb4f47003c000092/badge.svg?style=flat)](https://www.versioneye.com/user/projects/567fc289eb4f47003c000092)
