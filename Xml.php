@@ -85,8 +85,9 @@ class Xml {
 	/**
 	 * This opens an XML element
 	 *
-	 * @param $element name of the element
-	 * @param $attribs array of attributes, see Xml::expandAttributes()
+	 * @param string $element name of the element
+	 * @param array  $attribs array of attributes, see Xml::expandAttributes()
+	 *
 	 * @return string
 	 */
 	public static function openElement( $element, $attribs = null ) {
@@ -95,7 +96,9 @@ class Xml {
 
 	/**
 	 * Shortcut to close an XML element
-	 * @param $element element name
+	 *
+	 * @param string $element element name
+	 *
 	 * @return string
 	 */
 	public static function closeElement( $element ) { return "</$element>"; }
@@ -104,9 +107,10 @@ class Xml {
 	 * Same as Xml::element(), but does not escape contents. Handy when the
 	 * content you have is already valid xml.
 	 *
-	 * @param $element element name
-	 * @param $attribs array of attributes
-	 * @param $contents content of the element
+	 * @param string     $element element name
+	 * @param array|null $attribs array of attributes
+	 * @param string     $contents content of the element
+	 *
 	 * @return string
 	 */
 	public static function tags( $element, $attribs = null, $contents ) {
