@@ -3,7 +3,6 @@
 /**
  * Module of static functions for generating XML
  */
-
 class Xml {
 	/**
 	 * Format an XML element with given attributes and, optionally, text content.
@@ -11,10 +10,11 @@ class Xml {
 	 * Strings are assumed to not contain XML-illegal characters; special
 	 * characters (<, >, &) are escaped but illegals are not touched.
 	 *
-	 * @param $element String: element name
-	 * @param $attribs Array: Name=>value pairs. Values will be escaped.
-	 * @param $contents String: NULL to make an open tag only; '' for a contentless closed tag (default)
-	 * @param $allowShortTag Bool: whether '' in $contents will result in a contentless closed tag
+	 * @param string      $element element name
+	 * @param array|null  $attribs Name=>value pairs. Values will be escaped.
+	 * @param string|null $contents NULL to make an open tag only; '' for a contentless closed tag (default)
+	 * @param bool        $allowShortTag whether '' in $contents will result in a contentless closed tag
+	 *
 	 * @return string
 	 */
 	public static function element( $element, $attribs = null, $contents = '', $allowShortTag = true ) {
@@ -39,7 +39,12 @@ class Xml {
 	 * to set the XML attributes : attributename="value".
 	 * The values are passed to Sanitizer::encodeAttribute.
 	 * Return null if no attributes given.
-	 * @param $attribs Array of attributes for an XML element
+	 *
+	 * @param array $attribs of attributes for an XML element
+	 *
+	 * @return null|string
+	 *
+	 * @throws InvalidArgumentException if input is neither null nor an array
 	 */
 	public static function expandAttributes( $attribs ) {
 		$out = '';
@@ -50,7 +55,7 @@ class Xml {
 				$out .= " {$name}=\"" . Sanitizer::encodeAttribute( $val ) . '"';
 			return $out;
 		} else {
-			throw new MWException( 'Expected attribute array, got something else in ' . __METHOD__ );
+			throw new InvalidArgumentException( 'Expected attribute array, got something else in ' . __METHOD__ );
 		}
 	}
 
@@ -59,9 +64,10 @@ class Xml {
 	 * UtfNormal::cleanUp() validator first to ensure that no invalid UTF-8
 	 * is passed.
 	 *
-	 * @param $element String:
-	 * @param $attribs Array: Name=>value pairs. Values will be escaped.
-	 * @param $contents String: NULL to make an open tag only; '' for a contentless closed tag (default)
+	 * @param string      $element
+	 * @param array       $attribs Name=>value pairs. Values will be escaped.
+	 * @param string|null $contents NULL to make an open tag only; '' for a contentless closed tag (default)
+	 *
 	 * @return string
 	 */
 	public static function elementClean( $element, $attribs = array(), $contents = '') {
