@@ -1,0 +1,7 @@
+span.diff-html-added {
+    background-color: #CCFF99;
+}
+
+span.diff-html-removed {
+    background-color: #F55959;
+}

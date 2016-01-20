@@ -37,7 +37,10 @@ class DiffCommand extends Command
         InputInterface $input,
         OutputInterface $output
     ) {
-        $output->writeln('<info>PHP HTML Diff</info>');
+        $output->writeln(
+            '<head><style>'
+            . file_get_contents(dirname(dirname(dirname(__DIR__))) . '/res/css/diff.css')
+            . '</style></head>');
         $sourceFile = $input->getArgument('pathSource');
         $targetFile = $input->getArgument('pathCompare');
         $output->write(html_diff(file_get_contents($sourceFile), file_get_contents($targetFile)));
