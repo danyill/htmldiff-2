@@ -16,388 +16,462 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * or see http://www.gnu.org/
- * 
+ *
  */
- 
+
 /**
  * Any element in the DOM tree of an HTML document.
  * @ingroup DifferenceEngine
  */
-class Node {
+class Node
+{
 
-	public $parent;
+    public $parent;
 
-	protected $parentTree;
+    protected $parentTree;
 
-	public $whiteBefore = false;
+    public $whiteBefore = false;
 
-	public $whiteAfter = false;
+    public $whiteAfter = false;
 
-	function __construct($parent) {
-		$this->parent = $parent;
-	}
+    function __construct($parent)
+    {
+        $this->parent = $parent;
+    }
 
-	public function getParentTree() {
-		if (!isset($this->parentTree)) {
-			if (!is_null($this->parent)) {
-				$this->parentTree = $this->parent->getParentTree();
-				$this->parentTree[] = $this->parent;
-			} else {
-				$this->parentTree = array();
-			}
-		}
-		return $this->parentTree;
-	}
+    public function getParentTree()
+    {
+        if ( ! isset($this->parentTree)) {
+            if ( ! is_null($this->parent)) {
+                $this->parentTree   = $this->parent->getParentTree();
+                $this->parentTree[] = $this->parent;
+            } else {
+                $this->parentTree = array();
+            }
+        }
 
-	public function getLastCommonParent(Node $other) {
-		$result = new LastCommonParentResult();
+        return $this->parentTree;
+    }
 
-		$myParents = $this->getParentTree();
-		$otherParents = $other->getParentTree();
+    public function getLastCommonParent(Node $other)
+    {
+        $result = new LastCommonParentResult();
 
-		$i = 1;
-		$isSame = true;
-		$nbMyParents = count($myParents);
-		$nbOtherParents = count($otherParents);
-		while ($isSame && $i < $nbMyParents && $i < $nbOtherParents) {
-			if ($myParents[$i]->openingTag !== $otherParents[$i]->openingTag) {
-				$isSame = false;
-			} else {
-				// After a while, the index i-1 must be the last common parent
-				$i++;
-			}
-		}
+        $myParents    = $this->getParentTree();
+        $otherParents = $other->getParentTree();
 
-		$result->lastCommonParentDepth = $i - 1;
-		$result->parent = $myParents[$i - 1];
+        $i              = 1;
+        $isSame         = true;
+        $nbMyParents    = count($myParents);
+        $nbOtherParents = count($otherParents);
+        while ($isSame && $i < $nbMyParents && $i < $nbOtherParents) {
+            if ($myParents[$i]->openingTag !== $otherParents[$i]->openingTag) {
+                $isSame = false;
+            } else {
+                // After a while, the index i-1 must be the last common parent
+                $i++;
+            }
+        }
 
-		if (!$isSame || $nbMyParents > $nbOtherParents) {
-			// Not all tags matched, or all tags matched but
-			// there are tags left in this tree
-			$result->indexInLastCommonParent = $myParents[$i - 1]->getIndexOf($myParents[$i]);
-			$result->splittingNeeded = true;
-		} else if ($nbMyParents <= $nbOtherParents) {
-			$result->indexInLastCommonParent = $myParents[$i - 1]->getIndexOf($this);
-		}
-		return $result;
-	}
+        $result->lastCommonParentDepth = $i - 1;
+        $result->parent                = $myParents[$i - 1];
 
-	public function setParent($parent) {
-		$this->parent = $parent;
-		unset($this->parentTree);
-	}
+        if ( ! $isSame || $nbMyParents > $nbOtherParents) {
+            // Not all tags matched, or all tags matched but
+            // there are tags left in this tree
+            $result->indexInLastCommonParent = $myParents[$i - 1]->getIndexOf($myParents[$i]);
+            $result->splittingNeeded         = true;
+        } else if ($nbMyParents <= $nbOtherParents) {
+            $result->indexInLastCommonParent = $myParents[$i - 1]->getIndexOf($this);
+        }
 
-	public function inPre() {
-		$tree = $this->getParentTree();
-		foreach ($tree as &$ancestor) {
-			if ($ancestor->isPre()) {
-				return true;
-			}
-		}
-		return false;
-	}
+        return $result;
+    }
+
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+        unset($this->parentTree);
+    }
+
+    public function inPre()
+    {
+        $tree = $this->getParentTree();
+        foreach ($tree as &$ancestor) {
+            if ($ancestor->isPre()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 /**
  * Node that can contain other nodes. Represents an HTML tag.
  * @ingroup DifferenceEngine
  */
-class TagNode extends Node {
+class TagNode extends Node
+{
 
-	public $children = array();
+    public $children = array();
 
-	public $qName;
+    public $qName;
 
-	public $attributes = array();
+    public $attributes = array();
 
-	public $openingTag;
+    public $openingTag;
 
-	function __construct($parent, $qName, /*array*/ $attributes) {
-		parent::__construct($parent);
-		$this->qName = strtolower($qName);
-		foreach($attributes as $key => &$value){
-			$this->attributes[strtolower($key)] = $value;
-		}
-		return $this->openingTag = Xml::openElement($this->qName, $this->attributes);
-	}
+    function __construct(
+        $parent,
+        $qName, /*array*/
+        $attributes
+    ) {
+        parent::__construct($parent);
+        $this->qName = strtolower($qName);
+        foreach ($attributes as $key => &$value) {
+            $this->attributes[strtolower($key)] = $value;
+        }
 
-	public function addChildAbsolute(Node $node, $index) {
-		array_splice($this->children, $index, 0, array($node));
-	}
+        return $this->openingTag = Xml::openElement($this->qName, $this->attributes);
+    }
 
-	public function getIndexOf(Node $child) {
-		// don't trust array_search with objects
-		foreach ($this->children as $key => &$value){
-			if ($value === $child) {
-				return $key;
-			}
-		}
-		return null;
-	}
+    public function addChildAbsolute(Node $node, $index)
+    {
+        array_splice($this->children, $index, 0, array($node));
+    }
 
-	public function getNbChildren() {
-		return count($this->children);
-	}
+    public function getIndexOf(Node $child)
+    {
+        // don't trust array_search with objects
+        foreach ($this->children as $key => &$value) {
+            if ($value === $child) {
+                return $key;
+            }
+        }
 
-	public function getMinimalDeletedSet($id, &$allDeleted, &$somethingDeleted) {
-		$nodes = array();
+        return null;
+    }
 
-		$allDeleted = false;
-		$somethingDeleted = false;
-		$hasNonDeletedDescendant = false;
+    public function getNbChildren()
+    {
+        return count($this->children);
+    }
 
-		if (empty($this->children)) {
-			return $nodes;
-		}
+    public function getMinimalDeletedSet($id, &$allDeleted, &$somethingDeleted)
+    {
+        $nodes = array();
 
-		foreach ($this->children as &$child) {
-			$allDeleted_local = false;
-			$somethingDeleted_local = false;
-			$childrenChildren = $child->getMinimalDeletedSet($id, $allDeleted_local, $somethingDeleted_local);
-			if ($somethingDeleted_local) {
-				$nodes = array_merge($nodes, $childrenChildren);
-				$somethingDeleted = true;
-			}
-			if (!$allDeleted_local) {
-				$hasNonDeletedDescendant = true;
-			}
-		}
-		if (!$hasNonDeletedDescendant) {
-			$nodes = array($this);
-			$allDeleted = true;
-		}
-		return $nodes;
-	}
+        $allDeleted              = false;
+        $somethingDeleted        = false;
+        $hasNonDeletedDescendant = false;
 
-	public function splitUntil(TagNode $parent, Node $split, $includeLeft) {
-		$splitOccured = false;
-		if ($parent !== $this) {
-			$part1 = new TagNode(null, $this->qName, $this->attributes);
-			$part2 = new TagNode(null, $this->qName, $this->attributes);
-			$part1->setParent($this->parent);
-			$part2->setParent($this->parent);
+        if (empty($this->children)) {
+            return $nodes;
+        }
 
-			$onSplit = false;
-			$pastSplit = false;
-			foreach ($this->children as &$child)
-			{
-				if ($child === $split) {
-					$onSplit = true;
-				}
-				if(!$pastSplit || ($onSplit && $includeLeft)) {
-					$child->setParent($part1);
-					$part1->children[] = $child;
-				} else {
-					$child->setParent($part2);
-					$part2->children[] = $child;
-				}
-				if ($onSplit) {
-					$onSplit = false;
-					$pastSplit = true;
-				}
-			}
-			
-			// Replace the existing child with $part1 (left) and $part2 (right).
-			// Insertions shift existing content right, so insert part2 before
-			// inserting part1.
-			$myindexinparent = $this->parent->getIndexOf($this);
-			$this->parent->removeChild($myindexinparent);
-			if (!empty($part2->children)) {
-				$this->parent->addChildAbsolute($part2, $myindexinparent);
-			}
-			if (!empty($part1->children)) {
-				$this->parent->addChildAbsolute($part1, $myindexinparent);
-			}
-			if (!empty($part1->children) && !empty($part2->children)) {
-				$splitOccured = true;
-			}
+        foreach ($this->children as &$child) {
+            $allDeleted_local       = false;
+            $somethingDeleted_local = false;
+            $childrenChildren       = $child->getMinimalDeletedSet($id, $allDeleted_local, $somethingDeleted_local);
+            if ($somethingDeleted_local) {
+                $nodes            = array_merge($nodes, $childrenChildren);
+                $somethingDeleted = true;
+            }
+            if ( ! $allDeleted_local) {
+                $hasNonDeletedDescendant = true;
+            }
+        }
+        if ( ! $hasNonDeletedDescendant) {
+            $nodes      = array($this);
+            $allDeleted = true;
+        }
 
-			if ($includeLeft) {
-				$this->parent->splitUntil($parent, $part1, $includeLeft);
-			} else {
-				$this->parent->splitUntil($parent, $part2, $includeLeft);
-			}
-		}
-		return $splitOccured;
+        return $nodes;
+    }
 
-	}
+    public function splitUntil(TagNode $parent, Node $split, $includeLeft)
+    {
+        $splitOccured = false;
+        if ($parent !== $this) {
+            $part1 = new TagNode(null, $this->qName, $this->attributes);
+            $part2 = new TagNode(null, $this->qName, $this->attributes);
+            $part1->setParent($this->parent);
+            $part2->setParent($this->parent);
 
-	private function removeChild($index) {
-		unset($this->children[$index]);
-		$this->children = array_values($this->children);
-	}
+            $onSplit   = false;
+            $pastSplit = false;
+            foreach ($this->children as &$child) {
+                if ($child === $split) {
+                    $onSplit = true;
+                }
+                if ( ! $pastSplit || ($onSplit && $includeLeft)) {
+                    $child->setParent($part1);
+                    $part1->children[] = $child;
+                } else {
+                    $child->setParent($part2);
+                    $part2->children[] = $child;
+                }
+                if ($onSplit) {
+                    $onSplit   = false;
+                    $pastSplit = true;
+                }
+            }
 
-	public static $blocks = array('html', 'body','p','blockquote', 'h1',
-		'h2', 'h3', 'h4', 'h5', 'pre', 'div', 'ul', 'ol', 'li', 'table',
-		'tbody', 'tr', 'td', 'th', 'br');
+            // Replace the existing child with $part1 (left) and $part2 (right).
+            // Insertions shift existing content right, so insert part2 before
+            // inserting part1.
+            $myindexinparent = $this->parent->getIndexOf($this);
+            $this->parent->removeChild($myindexinparent);
+            if ( ! empty($part2->children)) {
+                $this->parent->addChildAbsolute($part2, $myindexinparent);
+            }
+            if ( ! empty($part1->children)) {
+                $this->parent->addChildAbsolute($part1, $myindexinparent);
+            }
+            if ( ! empty($part1->children) && ! empty($part2->children)) {
+                $splitOccured = true;
+            }
 
-	public function copyTree() {
-		$newThis = new TagNode(null, $this->qName, $this->attributes);
-		$newThis->whiteBefore = $this->whiteBefore;
-		$newThis->whiteAfter = $this->whiteAfter;
-		foreach ($this->children as &$child) {
-			$newChild = $child->copyTree();
-			$newChild->setParent($newThis);
-			$newThis->children[] = $newChild;
-		}
-		return $newThis;
-	}
+            if ($includeLeft) {
+                $this->parent->splitUntil($parent, $part1, $includeLeft);
+            } else {
+                $this->parent->splitUntil($parent, $part2, $includeLeft);
+            }
+        }
 
-	public function getMatchRatio(TagNode $other) {
-		$txtComp = new TextOnlyComparator($other);
-		return $txtComp->getMatchRatio(new TextOnlyComparator($this));
-	}
+        return $splitOccured;
 
-	public function expandWhiteSpace() {
-		$shift = 0;
-		$spaceAdded = false;
+    }
 
-		$nbOriginalChildren = $this->getNbChildren();
-		for ($i = 0; $i < $nbOriginalChildren; ++$i) {
-			$child = $this->children[$i + $shift];
+    private function removeChild($index)
+    {
+        unset($this->children[$index]);
+        $this->children = array_values($this->children);
+    }
 
-			if ($child instanceof TagNode) {
-				if (!$child->isPre()) {
-					$child->expandWhiteSpace();
-				}
-			}
-			if (!$spaceAdded && $child->whiteBefore) {
-				$ws = new WhiteSpaceNode(null, ' ', $child->getLeftMostChild());
-				$ws->setParent($this);
-				$this->addChildAbsolute($ws,$i + ($shift++));
-			}
-			if ($child->whiteAfter) {
-				$ws = new WhiteSpaceNode(null, ' ', $child->getRightMostChild());
-				$ws->setParent($this);
-				$this->addChildAbsolute($ws,$i + 1 + ($shift++));
-				$spaceAdded = true;
-			} else {
-				$spaceAdded = false;
-			}
+    public static $blocks = array(
+        'html',
+        'body',
+        'p',
+        'blockquote',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'pre',
+        'div',
+        'ul',
+        'ol',
+        'li',
+        'table',
+        'tbody',
+        'tr',
+        'td',
+        'th',
+        'br'
+    );
 
-		}
-	}
+    public function copyTree()
+    {
+        $newThis              = new TagNode(null, $this->qName, $this->attributes);
+        $newThis->whiteBefore = $this->whiteBefore;
+        $newThis->whiteAfter  = $this->whiteAfter;
+        foreach ($this->children as &$child) {
+            $newChild = $child->copyTree();
+            $newChild->setParent($newThis);
+            $newThis->children[] = $newChild;
+        }
 
-	public function getLeftMostChild() {
-		if (empty($this->children)) {
-			return $this;
-		}
-		return $this->children[0]->getLeftMostChild();
-	}
+        return $newThis;
+    }
 
-	public function getRightMostChild() {
-		if (empty($this->children)) {
-			return $this;
-		}
-		return $this->children[$this->getNbChildren() - 1]->getRightMostChild();
-	}
+    public function getMatchRatio(TagNode $other)
+    {
+        $txtComp = new TextOnlyComparator($other);
 
-	public function isPre() {
-		return 0 == strcasecmp($this->qName,'pre');
-	}
+        return $txtComp->getMatchRatio(new TextOnlyComparator($this));
+    }
 
-	public static function toDiffLine(TagNode $node) {
-		return $node->openingTag;
-	}
+    public function expandWhiteSpace()
+    {
+        $shift      = 0;
+        $spaceAdded = false;
+
+        $nbOriginalChildren = $this->getNbChildren();
+        for ($i = 0; $i < $nbOriginalChildren; ++$i) {
+            $child = $this->children[$i + $shift];
+
+            if ($child instanceof TagNode) {
+                if ( ! $child->isPre()) {
+                    $child->expandWhiteSpace();
+                }
+            }
+            if ( ! $spaceAdded && $child->whiteBefore) {
+                $ws = new WhiteSpaceNode(null, ' ', $child->getLeftMostChild());
+                $ws->setParent($this);
+                $this->addChildAbsolute($ws, $i + ($shift++));
+            }
+            if ($child->whiteAfter) {
+                $ws = new WhiteSpaceNode(null, ' ', $child->getRightMostChild());
+                $ws->setParent($this);
+                $this->addChildAbsolute($ws, $i + 1 + ($shift++));
+                $spaceAdded = true;
+            } else {
+                $spaceAdded = false;
+            }
+
+        }
+    }
+
+    public function getLeftMostChild()
+    {
+        if (empty($this->children)) {
+            return $this;
+        }
+
+        return $this->children[0]->getLeftMostChild();
+    }
+
+    public function getRightMostChild()
+    {
+        if (empty($this->children)) {
+            return $this;
+        }
+
+        return $this->children[$this->getNbChildren() - 1]->getRightMostChild();
+    }
+
+    public function isPre()
+    {
+        return 0 == strcasecmp($this->qName, 'pre');
+    }
+
+    public static function toDiffLine(TagNode $node)
+    {
+        return $node->openingTag;
+    }
 }
 
 /**
  * Represents a piece of text in the HTML file.
  * @ingroup DifferenceEngine
  */
-class TextNode extends Node {
+class TextNode extends Node
+{
 
-	public $text;
+    public $text;
 
-	public $modification;
+    public $modification;
 
-	function __construct($parent, $text) {
-		parent::__construct($parent);
-		$this->modification = new Modification(Modification::NONE);
-		$this->text = $text;
-	}
+    function __construct($parent, $text)
+    {
+        parent::__construct($parent);
+        $this->modification = new Modification(Modification::NONE);
+        $this->text         = $text;
+    }
 
-	public function copyTree() {
-		$clone = clone $this;
-		$clone->setParent(null);
-		return $clone;
-	}
+    public function copyTree()
+    {
+        $clone = clone $this;
+        $clone->setParent(null);
 
-	public function getLeftMostChild() {
-		return $this;
-	}
+        return $clone;
+    }
 
-	public function getRightMostChild() {
-		return $this;
-	}
+    public function getLeftMostChild()
+    {
+        return $this;
+    }
 
-	public function getMinimalDeletedSet($id, &$allDeleted, &$somethingDeleted) {
-		if ($this->modification->type == Modification::REMOVED
-					&& $this->modification->id == $id){
-			$somethingDeleted = true;
-			$allDeleted = true;
-			return array($this);
-		}
-		return array();
-	}
+    public function getRightMostChild()
+    {
+        return $this;
+    }
 
-	public function isSameText($other) {
-		if (is_null($other) || ! $other instanceof TextNode) {
-			return false;
-		}
-		return str_replace('\n', ' ',$this->text) === str_replace('\n', ' ',$other->text);
-	}
+    public function getMinimalDeletedSet($id, &$allDeleted, &$somethingDeleted)
+    {
+        if ($this->modification->type == Modification::REMOVED
+            && $this->modification->id == $id
+        ) {
+            $somethingDeleted = true;
+            $allDeleted       = true;
 
-	public static function toDiffLine(TextNode $node) {
-		return str_replace('\n', ' ',$node->text);
-	}
+            return array($this);
+        }
+
+        return array();
+    }
+
+    public function isSameText($other)
+    {
+        if (is_null($other) || ! $other instanceof TextNode) {
+            return false;
+        }
+
+        return str_replace('\n', ' ', $this->text) === str_replace('\n', ' ', $other->text);
+    }
+
+    public static function toDiffLine(TextNode $node)
+    {
+        return str_replace('\n', ' ', $node->text);
+    }
 }
 
 /**
  * @todo Document
  * @ingroup DifferenceEngine
  */
-class WhiteSpaceNode extends TextNode {
+class WhiteSpaceNode extends TextNode
+{
 
-	function __construct($parent, $s, Node $like = null) {
-		parent::__construct($parent, $s);
-		if(!is_null($like) && $like instanceof TextNode) {
-			$newModification = clone $like->modification;
-			$newModification->firstOfID = false;
-			$this->modification = $newModification;
-		}
-	}
+    function __construct($parent, $s, Node $like = null)
+    {
+        parent::__construct($parent, $s);
+        if ( ! is_null($like) && $like instanceof TextNode) {
+            $newModification            = clone $like->modification;
+            $newModification->firstOfID = false;
+            $this->modification         = $newModification;
+        }
+    }
 }
 
 /**
  * Represents the root of a HTML document.
  * @ingroup DifferenceEngine
  */
-class BodyNode extends TagNode {
+class BodyNode extends TagNode
+{
 
-	function __construct() {
-		parent::__construct(null, 'body', array());
-	}
+    function __construct()
+    {
+        parent::__construct(null, 'body', array());
+    }
 
-	public function copyTree() {
-		$newThis = new BodyNode();
-		foreach ($this->children as &$child) {
-			$newChild = $child->copyTree();
-			$newChild->setParent($newThis);
-			$newThis->children[] = $newChild;
-		}
-		return $newThis;
-	}
+    public function copyTree()
+    {
+        $newThis = new BodyNode();
+        foreach ($this->children as &$child) {
+            $newChild = $child->copyTree();
+            $newChild->setParent($newThis);
+            $newThis->children[] = $newChild;
+        }
 
-	public function getMinimalDeletedSet($id, &$allDeleted, &$somethingDeleted) {
-		$nodes = array();
-		foreach ($this->children as &$child) {
-			$childrenChildren = $child->getMinimalDeletedSet($id,
-						$allDeleted, $somethingDeleted);
-			$nodes = array_merge($nodes, $childrenChildren);
-		}
-		return $nodes;
-	}
+        return $newThis;
+    }
+
+    public function getMinimalDeletedSet($id, &$allDeleted, &$somethingDeleted)
+    {
+        $nodes = array();
+        foreach ($this->children as &$child) {
+            $childrenChildren = $child->getMinimalDeletedSet($id,
+                $allDeleted, $somethingDeleted);
+            $nodes            = array_merge($nodes, $childrenChildren);
+        }
+
+        return $nodes;
+    }
 
 }
 
@@ -406,26 +480,32 @@ class BodyNode extends TagNode {
  * are independent visible objects on the page. They are logically a TextNode.
  * @ingroup DifferenceEngine
  */
-class ImageNode extends TextNode {
+class ImageNode extends TextNode
+{
 
-	public $attributes;
+    public $attributes;
 
-	function __construct(TagNode $parent, /*array*/ $attrs) {
-		if(!array_key_exists('src', $attrs)) {
-			HTMLDiffer::diffDebug( "Image without a source\n" );
-			parent::__construct($parent, '<img></img>');
-		}else{
-			parent::__construct($parent, '<img>' . strtolower($attrs['src']) . '</img>');
-		}
-		$this->attributes = $attrs;
-	}
+    function __construct(
+        TagNode $parent, /*array*/
+        $attrs
+    ) {
+        if ( ! array_key_exists('src', $attrs)) {
+            HTMLDiffer::diffDebug("Image without a source\n");
+            parent::__construct($parent, '<img></img>');
+        } else {
+            parent::__construct($parent, '<img>' . strtolower($attrs['src']) . '</img>');
+        }
+        $this->attributes = $attrs;
+    }
 
-	public function isSameText($other) {
-		if (is_null($other) || ! $other instanceof ImageNode) {
-			return false;
-		}
-		return $this->text === $other->text;
-	}
+    public function isSameText($other)
+    {
+        if (is_null($other) || ! $other instanceof ImageNode) {
+            return false;
+        }
+
+        return $this->text === $other->text;
+    }
 
 }
 
@@ -433,10 +513,12 @@ class ImageNode extends TextNode {
  * No-op node
  * @ingroup DifferenceEngine
  */
-class DummyNode extends Node {
+class DummyNode extends Node
+{
 
-	function __construct() {
-		// no op
-	}
+    function __construct()
+    {
+        // no op
+    }
 
 }
