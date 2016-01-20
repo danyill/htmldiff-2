@@ -31,5 +31,5 @@ These are the original MediaWiki source files that this library is based on: [HT
 [Sanitizer.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/Sanitizer.php?view=markup&pathrev=58267), [Xml.php](http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/Xml.php?view=markup&pathrev=58267)
 
 [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg?style=flat-square)](https://php.net/)
-[![Total Downloads](https://poser.pugx.org/brownbear/php-transpiler/downloads)](https://packagist.org/packages/brownbear/php-transpiler)
-[![Dependency Status](https://www.versioneye.com/user/projects/567fc289eb4f47003c000092/badge.svg?style=flat)](https://www.versioneye.com/user/projects/567fc289eb4f47003c000092)
+[![Total Downloads](https://poser.pugx.org/brownbear/php-html-diff/downloads)](https://packagist.org/packages/brownbear/php-transpiler)
+[![Dependency Status](https://www.versioneye.com/user/projects/569fedac2c2fab00290002a7/badge.svg?style=flat)](https://www.versioneye.com/user/projects/569fedac2c2fab00290002a7)
