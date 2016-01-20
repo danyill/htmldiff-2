@@ -254,10 +254,12 @@ class Xml {
 
 	/**
 	 * Shortcut to make a span element
-	 * @param $text content of the element, will be escaped
-	 * @param $class class name of the span element
-	 * @param $attribs other attributes
-	 * @return string 
+	 *
+	 * @param string $text content of the element, will be escaped
+	 * @param string $class class name of the span element
+	 * @param array  $attribs other attributes
+	 *
+	 * @return string
 	 */
 	public static function span( $text, $class, $attribs=array() ) {
 		return self::element( 'span', array( 'class' => $class ) + $attribs, $text );
@@ -265,11 +267,13 @@ class Xml {
 
 	/**
 	 * Shortcut to make a specific element with a class attribute
-	 * @param $text content of the element, will be escaped
-	 * @param $class class name of the span element
-	 * @param $tag element name
-	 * @param $attribs other attributes
-	 * @return string 
+	 *
+	 * @param string $text content of the element, will be escaped
+	 * @param string $class class name of the span element
+	 * @param string $tag element name
+	 * @param array  $attribs other attributes
+	 *
+	 * @return string
 	 */
 	public static function wrapClass( $text, $class, $tag='span', $attribs=array() ) {
 		return self::tags( $tag, array( 'class' => $class ) + $attribs, $text );
@@ -277,10 +281,12 @@ class Xml {
 
 	/**
 	 * Convenience function to build an HTML text input field
-	 * @param $name value of the name attribute
-	 * @param $size value of the size attribute
-	 * @param $value value of the value attribute
-	 * @param $attribs other attributes
+	 *
+	 * @param string         $name value of the name attribute
+	 * @param bool|false|int $size value of the size attribute
+	 * @param bool|string    $value value of the value attribute
+	 * @param array          $attribs other attributes
+	 *
 	 * @return string HTML
 	 */
 	public static function input( $name, $size=false, $value=false, $attribs=array() ) {
@@ -292,10 +298,12 @@ class Xml {
 
 	/**
 	 * Convenience function to build an HTML password input field
-	 * @param $name value of the name attribute
-	 * @param $size value of the size attribute
-	 * @param $value value of the value attribute
-	 * @param $attribs other attributes
+	 *
+	 * @param  string           $name value of the name attribute
+	 * @param bool|false|int    $size value of the size attribute
+	 * @param bool|false|string $value value of the value attribute
+	 * @param array             $attribs other attributes
+	 *
 	 * @return string HTML
 	 */
 	public static function password( $name, $size=false, $value=false, $attribs=array() ) {
@@ -304,6 +312,10 @@ class Xml {
 
 	/**
 	 * Internal function for use in checkboxes and radio buttons and such.
+	 *
+	 * @param string $name
+	 * @param bool   $present
+	 *
 	 * @return array
 	 */
 	public static function attrib( $name, $present = true ) {
@@ -312,9 +324,11 @@ class Xml {
 
 	/**
 	 * Convenience function to build an HTML checkbox
-	 * @param $name value of the name attribute
-	 * @param $checked Whether the checkbox is checked or not
-	 * @param $attribs other attributes
+	 *
+	 * @param string     $name value of the name attribute
+	 * @param bool|false $checked Whether the checkbox is checked or not
+	 * @param array      $attribs other attributes
+	 *
 	 * @return string HTML
 	 */
 	public static function check( $name, $checked=false, $attribs=array() ) {
