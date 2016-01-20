@@ -43,6 +43,11 @@ class DiffCommand extends Command
             . '</style></head>');
         $sourceFile = $input->getArgument('pathSource');
         $targetFile = $input->getArgument('pathCompare');
-        $output->write(html_diff(file_get_contents($sourceFile), file_get_contents($targetFile)));
+        $sourceCode = explode("\n", file_get_contents($sourceFile));
+        $targetCode = explode("\n", file_get_contents($targetFile));
+        array_shift($sourceCode);
+        array_shift($targetCode);
+        $output->write(html_entity_decode(html_diff(htmlentities(join("\n", $sourceCode)),
+            htmlentities(join("\n", $targetCode)))));
     }
 }
