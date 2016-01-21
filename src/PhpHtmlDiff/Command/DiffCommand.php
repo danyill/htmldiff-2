@@ -47,7 +47,7 @@ class DiffCommand extends Command
         $targetCode = explode("\n", file_get_contents($targetFile));
         array_shift($sourceCode);
         array_shift($targetCode);
-        $output->write(html_entity_decode(html_diff(htmlentities(join("\n", $sourceCode)),
-            htmlentities(join("\n", $targetCode)))));
+        $output->write((html_diff((join("\n", $sourceCode)),
+            (join("\n", $targetCode)))));
     }
 }
