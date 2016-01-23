@@ -99,7 +99,7 @@ class DomTreeBuilder
 
     function __construct()
     {
-        $this->bodyNode    = $this->currentParent = new BodyNode();
+        $this->bodyNode = $this->currentParent = new BodyNode();
         $this->lastSibling = new DummyNode();
     }
 
@@ -121,11 +121,13 @@ class DomTreeBuilder
             HTMLDiffer::diffDebug("Starting $name node.\n");
             $this->endWord();
 
-            $newNode                         = new TagNode($this->currentParent, $name, $attributes);
+            $newNode = new TagNode($this->currentParent, $name, $attributes);
             $this->currentParent->children[] = $newNode;
-            $this->currentParent             = $newNode;
-            $this->lastSibling               = new DummyNode();
-            if ($this->whiteSpaceBeforeThis && ! in_array(strtolower($this->currentParent->qName), TagNode::$blocks)) {
+            $this->currentParent = $newNode;
+            $this->lastSibling = new DummyNode();
+            if ($this->whiteSpaceBeforeThis && !in_array(strtolower($this->currentParent->qName),
+                    TagNode::$blocks)
+            ) {
                 $this->currentParent->whiteBefore = true;
             }
             $this->whiteSpaceBeforeThis = false;
@@ -141,22 +143,22 @@ class DomTreeBuilder
             HTMLDiffer::diffDebug("Ending $name node.\n");
             if (0 == strcasecmp($name, 'img')) {
                 // Insert a dummy leaf for the image
-                $img                             = new ImageNode($this->currentParent,
+                $img = new ImageNode($this->currentParent,
                     $this->currentParent->attributes);
                 $this->currentParent->children[] = $img;
-                $img->whiteBefore                = $this->whiteSpaceBeforeThis;
-                $this->lastSibling               = $img;
-                $this->textNodes[]               = $img;
+                $img->whiteBefore = $this->whiteSpaceBeforeThis;
+                $this->lastSibling = $img;
+                $this->textNodes[] = $img;
             }
             $this->endWord();
-            if ( ! in_array(strtolower($this->currentParent->qName), TagNode::$blocks)) {
+            if (!in_array(strtolower($this->currentParent->qName), TagNode::$blocks)) {
                 $this->lastSibling = $this->currentParent;
             } else {
                 $this->lastSibling = new DummyNode();
             }
-            $this->currentParent        = $this->currentParent->parent;
+            $this->currentParent = $this->currentParent->parent;
             $this->whiteSpaceBeforeThis = false;
-            if ( ! $this->notInPre && strcasecmp($name, 'pre') == 0) {
+            if (!$this->notInPre && strcasecmp($name, 'pre') == 0) {
                 $this->notInPre = true;
             }
         } else {
@@ -176,15 +178,15 @@ class DomTreeBuilder
             if (preg_match(self::whitespace, $word) && $this->notInPre) {
                 $this->endWord();
                 $this->lastSibling->whiteAfter = true;
-                $this->whiteSpaceBeforeThis    = true;
+                $this->whiteSpaceBeforeThis = true;
             } else if (preg_match(self::delimiter, $word)) {
                 $this->endWord();
-                $textNode                        = new TextNode($this->currentParent, $word);
+                $textNode = new TextNode($this->currentParent, $word);
                 $this->currentParent->children[] = $textNode;
-                $textNode->whiteBefore           = $this->whiteSpaceBeforeThis;
-                $this->whiteSpaceBeforeThis      = false;
-                $this->lastSibling               = $textNode;
-                $this->textNodes[]               = $textNode;
+                $textNode->whiteBefore = $this->whiteSpaceBeforeThis;
+                $this->whiteSpaceBeforeThis = false;
+                $this->lastSibling = $textNode;
+                $this->textNodes[] = $textNode;
             } else {
                 $this->newWord .= $word;
             }
@@ -194,13 +196,13 @@ class DomTreeBuilder
     private function endWord()
     {
         if ($this->newWord !== '') {
-            $node                            = new TextNode($this->currentParent, $this->newWord);
+            $node = new TextNode($this->currentParent, $this->newWord);
             $this->currentParent->children[] = $node;
-            $node->whiteBefore               = $this->whiteSpaceBeforeThis;
-            $this->whiteSpaceBeforeThis      = false;
-            $this->lastSibling               = $node;
-            $this->textNodes[]               = $node;
-            $this->newWord                   = "";
+            $node->whiteBefore = $this->whiteSpaceBeforeThis;
+            $this->whiteSpaceBeforeThis = false;
+            $this->lastSibling = $node;
+            $this->textNodes[] = $node;
+            $this->newWord = "";
         }
     }
 
@@ -214,7 +216,7 @@ class TextNodeDiffer
 {
 
     private $textNodes;
-    public $bodyNode;
+    public  $bodyNode;
 
     private $oldTextNodes;
     private $oldBodyNode;
@@ -232,10 +234,10 @@ class TextNodeDiffer
 
     function __construct(DomTreeBuilder $tree, DomTreeBuilder $oldTree)
     {
-        $this->textNodes    = $tree->textNodes;
-        $this->bodyNode     = $tree->bodyNode;
+        $this->textNodes = $tree->textNodes;
+        $this->bodyNode = $tree->bodyNode;
         $this->oldTextNodes = $oldTree->textNodes;
-        $this->oldBodyNode  = $oldTree->bodyNode;
+        $this->oldBodyNode = $oldTree->bodyNode;
     }
 
     public function markAsNew($start, $end)
@@ -245,16 +247,16 @@ class TextNodeDiffer
         }
 
         if ($this->whiteAfterLastChangedPart) {
-            $this->textNodes[$start]->whiteBefore = false;
+            $this->textNodes[ $start ]->whiteBefore = false;
         }
 
         for ($i = $start; $i < $end; ++$i) {
-            $mod                               = new Modification(Modification::ADDED);
-            $mod->id                           = $this->newID;
-            $this->textNodes[$i]->modification = $mod;
+            $mod = new Modification(Modification::ADDED);
+            $mod->id = $this->newID;
+            $this->textNodes[ $i ]->modification = $mod;
         }
         if ($start < $end) {
-            $this->textNodes[$start]->modification->firstOfID = true;
+            $this->textNodes[ $start ]->modification->firstOfID = true;
         }
         ++$this->newID;
     }
@@ -269,29 +271,28 @@ class TextNodeDiffer
             $this->changedIDUsed = false;
         }
 
-        $changes;
         while ($i < $rightend) {
-            $acthis  = new AncestorComparator($this->textNodes[$i]->getParentTree());
-            $acother = new AncestorComparator($this->oldTextNodes[$j]->getParentTree());
-            $result  = $acthis->getResult($acother);
+            $acthis = new AncestorComparator($this->textNodes[ $i ]->getParentTree());
+            $acother = new AncestorComparator($this->oldTextNodes[ $j ]->getParentTree());
+            $result = $acthis->getResult($acother);
             unset($acthis, $acother);
 
             if ($result) {
                 $mod = new Modification(Modification::CHANGED);
 
-                if ( ! $this->changedIDUsed) {
+                if (!$this->changedIDUsed) {
                     $mod->firstOfID = true;
-                } else if ( ! is_null($result) && $result !== $this->changes) {
+                } else if (!is_null($result) && $result !== $this->changes) {
                     ++$this->changedID;
                     $mod->firstOfID = true;
                 }
 
                 $mod->changes = $result;
-                $mod->id      = $this->changedID;
+                $mod->id = $this->changedID;
 
-                $this->textNodes[$i]->modification = $mod;
-                $this->changes                     = $result;
-                $this->changedIDUsed               = true;
+                $this->textNodes[ $i ]->modification = $mod;
+                $this->changes = $result;
+                $this->changedIDUsed = true;
             } else if ($this->changedIDUsed) {
                 ++$this->changedID;
                 $this->changedIDUsed = false;
@@ -308,25 +309,25 @@ class TextNodeDiffer
             return;
         }
 
-        if ($before > 0 && $this->textNodes[$before - 1]->whiteAfter) {
+        if ($before > 0 && $this->textNodes[ $before - 1 ]->whiteAfter) {
             $this->whiteAfterLastChangedPart = true;
         } else {
             $this->whiteAfterLastChangedPart = false;
         }
 
         for ($i = $start; $i < $end; ++$i) {
-            $mod     = new Modification(Modification::REMOVED);
+            $mod = new Modification(Modification::REMOVED);
             $mod->id = $this->deletedID;
 
             // oldTextNodes is used here because we're going to move its deleted
             // elements to this tree!
-            $this->oldTextNodes[$i]->modification = $mod;
+            $this->oldTextNodes[ $i ]->modification = $mod;
         }
-        $this->oldTextNodes[$start]->modification->firstOfID = true;
+        $this->oldTextNodes[ $start ]->modification->firstOfID = true;
 
-        $root = $this->oldTextNodes[$start]->getLastCommonParent($this->oldTextNodes[$end - 1])->parent;
+        $root = $this->oldTextNodes[ $start ]->getLastCommonParent($this->oldTextNodes[ $end - 1 ])->parent;
 
-        $junk1        = $junk2 = null;
+        $junk1 = $junk2 = null;
         $deletedNodes = $root->getMinimalDeletedSet($this->deletedID, $junk1, $junk2);
 
         HTMLDiffer::diffDebug("Minimal set of deleted nodes of size " . count($deletedNodes) . "\n");
@@ -334,33 +335,33 @@ class TextNodeDiffer
         // Set prevLeaf to the leaf after which the old HTML needs to be
         // inserted
         if ($before > 0) {
-            $prevLeaf = $this->textNodes[$before - 1];
+            $prevLeaf = $this->textNodes[ $before - 1 ];
         }
         // Set nextLeaf to the leaf before which the old HTML needs to be
         // inserted
         if ($before < count($this->textNodes)) {
-            $nextLeaf = $this->textNodes[$before];
+            $nextLeaf = $this->textNodes[ $before ];
         }
 
         while (count($deletedNodes) > 0) {
             if (isset($prevLeaf)) {
-                $prevResult = $prevLeaf->getLastCommonParent($deletedNodes[0]);
+                $prevResult = $prevLeaf->getLastCommonParent($deletedNodes[ 0 ]);
             } else {
-                $prevResult                          = new LastCommonParentResult();
-                $prevResult->parent                  = $this->bodyNode;
+                $prevResult = new LastCommonParentResult();
+                $prevResult->parent = $this->bodyNode;
                 $prevResult->indexInLastCommonParent = -1;
             }
             if (isset($nextLeaf)) {
-                $nextResult = $nextLeaf->getLastCommonParent($deletedNodes[count($deletedNodes) - 1]);
+                $nextResult = $nextLeaf->getLastCommonParent($deletedNodes[ count($deletedNodes) - 1 ]);
             } else {
-                $nextResult                          = new LastCommonParentResult();
-                $nextResult->parent                  = $this->bodyNode;
+                $nextResult = new LastCommonParentResult();
+                $nextResult->parent = $this->bodyNode;
                 $nextResult->indexInLastCommonParent = $this->bodyNode->getNbChildren();
             }
 
             if ($prevResult->lastCommonParentDepth == $nextResult->lastCommonParentDepth) {
                 // We need some metric to choose which way to add-...
-                if ($deletedNodes[0]->parent === $deletedNodes[count($deletedNodes) - 1]->parent
+                if ($deletedNodes[ 0 ]->parent === $deletedNodes[ count($deletedNodes) - 1 ]->parent
                     && $prevResult->parent === $nextResult->parent
                 ) {
                     // The difference is not in the parent
@@ -368,8 +369,8 @@ class TextNodeDiffer
                 } else {
                     // The difference is in the parent, so compare them
                     // now THIS is tricky
-                    $distancePrev = $deletedNodes[0]->parent->getMatchRatio($prevResult->parent);
-                    $distanceNext = $deletedNodes[count($deletedNodes) - 1]->parent->getMatchRatio($nextResult->parent);
+                    $distancePrev = $deletedNodes[ 0 ]->parent->getMatchRatio($prevResult->parent);
+                    $distanceNext = $deletedNodes[ count($deletedNodes) - 1 ]->parent->getMatchRatio($nextResult->parent);
 
                     if ($distancePrev <= $distanceNext) {
                         $prevResult->lastCommonParentDepth = $prevResult->lastCommonParentDepth + 1;
@@ -385,8 +386,8 @@ class TextNodeDiffer
                 if ($prevResult->splittingNeeded) {
                     $prevLeaf->parent->splitUntil($prevResult->parent, $prevLeaf, true);
                 }
-                $prevLeaf = $deletedNodes[0]->copyTree();
-                unset($deletedNodes[0]);
+                $prevLeaf = $deletedNodes[ 0 ]->copyTree();
+                unset($deletedNodes[ 0 ]);
                 $deletedNodes = array_values($deletedNodes);
                 $prevLeaf->setParent($prevResult->parent);
                 $prevResult->parent->addChildAbsolute($prevLeaf, $prevResult->indexInLastCommonParent + 1);
@@ -400,8 +401,8 @@ class TextNodeDiffer
                         $nextResult->indexInLastCommonParent = $nextResult->indexInLastCommonParent + 1;
                     }
                 }
-                $nextLeaf = $deletedNodes[count($deletedNodes) - 1]->copyTree();
-                unset($deletedNodes[count($deletedNodes) - 1]);
+                $nextLeaf = $deletedNodes[ count($deletedNodes) - 1 ]->copyTree();
+                unset($deletedNodes[ count($deletedNodes) - 1 ]);
                 $deletedNodes = array_values($deletedNodes);
                 $nextLeaf->setParent($nextResult->parent);
                 $nextResult->parent->addChildAbsolute($nextLeaf, $nextResult->indexInLastCommonParent);
@@ -429,7 +430,7 @@ class TextNodeDiffer
 class HTMLDiffer
 {
 
-    private $output;
+    private        $output;
     private static $debug = '';
 
     function __construct($output)
@@ -452,13 +453,14 @@ class HTMLDiffer
         xml_set_character_data_handler($xml_parser, array($domfrom, "characters"));
 
         HTMLDiffer::diffDebug("Parsing " . strlen($from) . " characters worth of HTML\n");
-        if ( ! xml_parse($xml_parser, '<?xml version="1.0" encoding="UTF-8"?>' . Sanitizer::hackDocType() . '<body>',
+        if (!xml_parse($xml_parser,
+                '<?xml version="1.0" encoding="UTF-8"?>' . Sanitizer::hackDocType() . '<body>',
                 false)
-             || ! xml_parse($xml_parser, $from, false)
-             || ! xml_parse($xml_parser, '</body>', true)
+            || !xml_parse($xml_parser, $from, false)
+            || !xml_parse($xml_parser, '</body>', true)
         ) {
             $error = xml_error_string(xml_get_error_code($xml_parser));
-            $line  = xml_get_current_line_number($xml_parser);
+            $line = xml_get_current_line_number($xml_parser);
             HTMLDiffer::diffDebug("XML error: $error at line $line\n");
         }
         xml_parser_free($xml_parser);
@@ -475,42 +477,47 @@ class HTMLDiffer
         xml_set_character_data_handler($xml_parser, array($domto, "characters"));
 
         HTMLDiffer::diffDebug("Parsing " . strlen($to) . " characters worth of HTML\n");
-        if ( ! xml_parse($xml_parser, '<?xml version="1.0" encoding="UTF-8"?>' . Sanitizer::hackDocType() . '<body>',
+        if (!xml_parse($xml_parser,
+                '<?xml version="1.0" encoding="UTF-8"?>' . Sanitizer::hackDocType() . '<body>',
                 false)
-             || ! xml_parse($xml_parser, $to, false)
-             || ! xml_parse($xml_parser, '</body>', true)
+            || !xml_parse($xml_parser, $to, false)
+            || !xml_parse($xml_parser, '</body>', true)
         ) {
             $error = xml_error_string(xml_get_error_code($xml_parser));
-            $line  = xml_get_current_line_number($xml_parser);
+            $line = xml_get_current_line_number($xml_parser);
             HTMLDiffer::diffDebug("XML error: $error at line $line\n");
         }
         xml_parser_free($xml_parser);
         unset($to);
 
-        $diffengine  = new WikiDiff3();
+        $diffengine = new WikiDiff3();
         $differences = $this->preProcess($diffengine->diff_range($domfrom->getDiffLines(), $domto->getDiffLines()));
         unset($xml_parser, $diffengine);
 
         $domdiffer = new TextNodeDiffer($domto, $domfrom);
 
-        $currentIndexLeft  = 0;
+        $currentIndexLeft = 0;
         $currentIndexRight = 0;
         foreach ($differences as &$d) {
             if ($d->leftstart > $currentIndexLeft && $describe_formatting_changes) {
-                $domdiffer->handlePossibleChangedPart($currentIndexLeft, $d->leftstart,
-                    $currentIndexRight, $d->rightstart);
+                $domdiffer->handlePossibleChangedPart($currentIndexLeft,
+                    $d->leftstart,
+                    $currentIndexRight,
+                    $d->rightstart);
             }
             if ($d->leftlength > 0) {
                 $domdiffer->markAsDeleted($d->leftstart, $d->leftend, $d->rightstart);
             }
             $domdiffer->markAsNew($d->rightstart, $d->rightend);
 
-            $currentIndexLeft  = $d->leftend;
+            $currentIndexLeft = $d->leftend;
             $currentIndexRight = $d->rightend;
         }
         $oldLength = $domdiffer->lengthOld();
         if ($currentIndexLeft < $oldLength && $describe_formatting_changes) {
-            $domdiffer->handlePossibleChangedPart($currentIndexLeft, $oldLength, $currentIndexRight,
+            $domdiffer->handlePossibleChangedPart($currentIndexLeft,
+                $oldLength,
+                $currentIndexRight,
                 $domdiffer->lengthNew());
         }
         $domdiffer->expandWhiteSpace();
@@ -526,22 +533,22 @@ class HTMLDiffer
 
         $nbDifferences = count($differences);
         for ($i = 0; $i < $nbDifferences; ++$i) {
-            $leftStart  = $differences[$i]->leftstart;
-            $leftEnd    = $differences[$i]->leftend;
-            $rightStart = $differences[$i]->rightstart;
-            $rightEnd   = $differences[$i]->rightend;
+            $leftStart = $differences[ $i ]->leftstart;
+            $leftEnd = $differences[ $i ]->leftend;
+            $rightStart = $differences[ $i ]->rightstart;
+            $rightEnd = $differences[ $i ]->rightend;
 
-            $leftLength  = $leftEnd - $leftStart;
+            $leftLength = $leftEnd - $leftStart;
             $rightLength = $rightEnd - $rightStart;
 
             while ($i + 1 < $nbDifferences && self::score($leftLength,
-                    $differences[$i + 1]->leftlength,
+                    $differences[ $i + 1 ]->leftlength,
                     $rightLength,
-                    $differences[$i + 1]->rightlength)
-                                              > ($differences[$i + 1]->leftstart - $leftEnd)) {
-                $leftEnd     = $differences[$i + 1]->leftend;
-                $rightEnd    = $differences[$i + 1]->rightend;
-                $leftLength  = $leftEnd - $leftStart;
+                    $differences[ $i + 1 ]->rightlength)
+                                              > ($differences[ $i + 1 ]->leftstart - $leftEnd)) {
+                $leftEnd = $differences[ $i + 1 ]->leftend;
+                $rightEnd = $differences[ $i + 1 ]->rightend;
+                $leftLength = $leftEnd - $leftStart;
                 $rightLength = $rightEnd - $rightStart;
                 ++$i;
             }
@@ -562,7 +569,7 @@ class HTMLDiffer
             return 0;
         }
         $numbers = array($ll, $nll, $rl, $nrl);
-        $d       = 0;
+        $d = 0;
         foreach ($numbers as &$number) {
             while ($number > 3) {
                 $d += 3;
@@ -622,17 +629,14 @@ class TextOnlyComparator
     public function getMatchRatio(TextOnlyComparator $other)
     {
         $nbOthers = count($other->leafs);
-        $nbThis   = count($this->leafs);
+        $nbThis = count($this->leafs);
         if ($nbOthers == 0 || $nbThis == 0) {
             return -log(0);
         }
 
         $diffengine = new WikiDiff3(25000, 1.35);
         $diffengine->diff($this->leafs, $other->leafs);
-
         $lcsLength = $diffengine->getLcsLength();
-
-        $distanceThis = $nbThis - $lcsLength;
 
         return (2.0 - $lcsLength / $nbOthers - $lcsLength / $nbThis) / 2.0;
     }
@@ -650,7 +654,7 @@ class AncestorComparator
     function __construct(/*array*/
         $ancestors
     ) {
-        $this->ancestors     = $ancestors;
+        $this->ancestors = $ancestors;
         $this->ancestorsText = array_map(array('TagNode', 'toDiffLine'), $ancestors);
     }
 
@@ -659,7 +663,7 @@ class AncestorComparator
     public function getResult(AncestorComparator $other)
     {
 
-        $diffengine  = new WikiDiff3(10000, 1.35);
+        $diffengine = new WikiDiff3(10000, 1.35);
         $differences = $diffengine->diff_range($other->ancestorsText, $this->ancestorsText);
 
         if (count($differences) == 0) {
@@ -682,14 +686,14 @@ class ChangeTextGenerator
     function __construct(AncestorComparator $ancestorComparator, AncestorComparator $other)
     {
         $this->ancestorComparator = $ancestorComparator;
-        $this->other              = $other;
-        $this->factory            = new TagToStringFactory();
+        $this->other = $other;
+        $this->factory = new TagToStringFactory();
     }
 
     public function getChanged(/*array*/
         $differences
     ) {
-        $txt            = new ChangeText;
+        $txt = new ChangeText;
         $rootlistopened = false;
         if (count($differences) > 1) {
             $txt->addHtml('<ul class="changelist">');
@@ -697,7 +701,7 @@ class ChangeTextGenerator
         }
         $nbDifferences = count($differences);
         for ($j = 0; $j < $nbDifferences; ++$j) {
-            $d              = $differences[$j];
+            $d = $differences[ $j ];
             $lvl1listopened = false;
             if ($rootlistopened) {
                 $txt->addHtml('<li>');
@@ -712,7 +716,7 @@ class ChangeTextGenerator
                     $txt->addHtml('<li>');
                 }
                 // add a bullet for a old tag
-                $this->addTagOld($txt, $this->other->ancestors[$i]);
+                $this->addTagOld($txt, $this->other->ancestors[ $i ]);
                 if ($lvl1listopened) {
                     $txt->addHtml('</li>');
                 }
@@ -723,7 +727,7 @@ class ChangeTextGenerator
                     $txt->addHtml('<li>');
                 }
                 // add a bullet for a new tag
-                $this->addTagNew($txt, $this->ancestorComparator->ancestors[$i]);
+                $this->addTagNew($txt, $this->ancestorComparator->ancestors[ $i ]);
 
                 if ($lvl1listopened) {
                     $txt->addHtml('</li>');
@@ -773,52 +777,54 @@ class ChangeText
 class TagToStringFactory
 {
 
-    private static $containerTags = array(
-        'html',
-        'body',
-        'p',
-        'blockquote',
-        'h1',
-        'h2',
-        'h3',
-        'h4',
-        'h5',
-        'pre',
-        'div',
-        'ul',
-        'ol',
-        'li',
-        'table',
-        'tbody',
-        'tr',
-        'td',
-        'th',
-        'br',
-        'hr',
-        'code',
-        'dl',
-        'dt',
-        'dd',
-        'input',
-        'form',
-        'img',
-        'span',
-        'a'
-    );
+    private static $containerTags
+        = array(
+            'html',
+            'body',
+            'p',
+            'blockquote',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'pre',
+            'div',
+            'ul',
+            'ol',
+            'li',
+            'table',
+            'tbody',
+            'tr',
+            'td',
+            'th',
+            'br',
+            'hr',
+            'code',
+            'dl',
+            'dt',
+            'dd',
+            'input',
+            'form',
+            'img',
+            'span',
+            'a'
+        );
 
-    private static $styleTags = array(
-        'i',
-        'b',
-        'strong',
-        'em',
-        'font',
-        'big',
-        'del',
-        'tt',
-        'sub',
-        'sup',
-        'strike'
-    );
+    private static $styleTags
+        = array(
+            'i',
+            'b',
+            'strong',
+            'em',
+            'font',
+            'big',
+            'del',
+            'tt',
+            'sub',
+            'sup',
+            'strike'
+        );
 
     const MOVED = 1;
     const STYLE = 2;
@@ -860,7 +866,7 @@ class TagToString
     function __construct(TagNode $node, $sem)
     {
         $this->node = $node;
-        $this->sem  = $sem;
+        $this->sem = $sem;
     }
 
     public function getRemovedDescription(ChangeText $txt)
@@ -902,28 +908,33 @@ class TagToString
         if (count($attributes) < 1) {
             return;
         }
-        $firstOne           = true;
+        $firstOne = true;
         $nbAttributes_min_1 = count($attributes) - 1;
-        $keys               = array_keys($attributes);
+        $keys = array_keys($attributes);
         for ($i = 0; $i < $nbAttributes_min_1; $i++) {
-            $key  = $keys[$i];
-            $attr = $attributes[$key];
+            $key = $keys[ $i ];
+            $attr = $attributes[ $key ];
             if ($firstOne) {
                 $firstOne = false;
-                $txt->addHtml(wfMsgExt('diff-with', 'escapenoentities', $this->translateArgument($key),
+                $txt->addHtml(wfMsgExt('diff-with',
+                    'escapenoentities',
+                    $this->translateArgument($key),
                     htmlspecialchars($attr)));
                 continue;
             }
             $txt->addHtml(wfMsgExt('comma-separator', 'escapenoentities') .
-                          wfMsgExt('diff-with-additional', 'escapenoentities',
-                              $this->translateArgument($key), htmlspecialchars($attr))
+                          wfMsgExt('diff-with-additional',
+                              'escapenoentities',
+                              $this->translateArgument($key),
+                              htmlspecialchars($attr))
             );
         }
 
         if ($nbAttributes_min_1 > 0) {
-            $txt->addHtml(wfMsgExt('diff-with-final', 'escapenoentities',
-                $this->translateArgument($keys[$nbAttributes_min_1]),
-                htmlspecialchars($attributes[$keys[$nbAttributes_min_1]])));
+            $txt->addHtml(wfMsgExt('diff-with-final',
+                'escapenoentities',
+                $this->translateArgument($keys[ $nbAttributes_min_1 ]),
+                htmlspecialchars($attributes[ $keys[ $nbAttributes_min_1 ] ])));
         }
     }
 
@@ -980,8 +991,10 @@ class AnchorToString extends TagToString
     protected function addAttributes(ChangeText $txt, array $attributes)
     {
         if (array_key_exists('href', $attributes)) {
-            $txt->addHtml(' ' . wfMsgExt('diff-withdestination', 'parseinline', htmlspecialchars($attributes['href'])));
-            unset($attributes['href']);
+            $txt->addHtml(' ' . wfMsgExt('diff-withdestination',
+                    'parseinline',
+                    htmlspecialchars($attributes[ 'href' ])));
+            unset($attributes[ 'href' ]);
         }
         parent::addAttributes($txt, $attributes);
     }
@@ -998,7 +1011,7 @@ class HTMLOutput
 
     function __construct($prefix, $handler)
     {
-        $this->prefix  = $prefix;
+        $this->prefix = $prefix;
         $this->handler = $handler;
     }
 
@@ -1010,10 +1023,10 @@ class HTMLOutput
             $handler->startElement($node->qName, $node->attributes);
         }
 
-        $newStarted    = false;
-        $remStarted    = false;
+        $newStarted = false;
+        $remStarted = false;
         $changeStarted = false;
-        $changeTXT     = '';
+        $changeTXT = '';
 
         foreach ($node->children as &$child) {
             if ($child instanceof TagNode) {
@@ -1046,17 +1059,17 @@ class HTMLOutput
 
                 // no else because a removed part can just be closed and a new
                 // part can start
-                if ( ! $newStarted && $mod->type == Modification::ADDED) {
+                if (!$newStarted && $mod->type == Modification::ADDED) {
                     $attrs = array('class' => 'diff-html-added');
                     if ($mod->firstOfID) {
-                        $attrs['id'] = "added-{$this->prefix}-{$mod->id}";
+                        $attrs[ 'id' ] = "added-{$this->prefix}-{$mod->id}";
                     }
                     $handler->startElement('span', $attrs);
                     $newStarted = true;
-                } else if ( ! $changeStarted && $mod->type == Modification::CHANGED) {
+                } else if (!$changeStarted && $mod->type == Modification::CHANGED) {
                     $attrs = array('class' => 'diff-html-changed');
                     if ($mod->firstOfID) {
-                        $attrs['id'] = "changed-{$this->prefix}-{$mod->id}";
+                        $attrs[ 'id' ] = "changed-{$this->prefix}-{$mod->id}";
                     }
                     $handler->startElement('span', $attrs);
 
@@ -1066,11 +1079,11 @@ class HTMLOutput
                     $handler->endElement('span');
 
                     $changeStarted = true;
-                    $changeTXT     = $mod->changes;
-                } else if ( ! $remStarted && $mod->type == Modification::REMOVED) {
+                    $changeTXT = $mod->changes;
+                } else if (!$remStarted && $mod->type == Modification::REMOVED) {
                     $attrs = array('class' => 'diff-html-removed');
                     if ($mod->firstOfID) {
-                        $attrs['id'] = "removed-{$this->prefix}-{$mod->id}";
+                        $attrs[ 'id' ] = "removed-{$this->prefix}-{$mod->id}";
                     }
                     $handler->startElement('span', $attrs);
                     $remStarted = true;
