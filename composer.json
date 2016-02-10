@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "symfony/console": "3.0.1",
+    "symfony/console": "3.0.2",
     "php": ">=5.6"
   },
   "autoload": {
